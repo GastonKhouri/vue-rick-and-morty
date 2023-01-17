@@ -1,5 +1,5 @@
 {
-  "name": "breaking-bad",
+  "name": "rick-and-morty",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
@@ -10,6 +10,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "axios": "^1.2.2",
     "vue": "^3.2.41",
     "vue-router": "^4.1.6"
   },

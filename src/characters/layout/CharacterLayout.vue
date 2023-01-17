@@ -5,12 +5,12 @@
 	import { characterRoute } from '../router';
 
 	const routeLinks: RouteLink[] = characterRoute.children
-		?.filter(route => (route.props as { visible: boolean }).visible)
-		.map(route => ({
+		?.filter( route => ( route.props as { visible: boolean; } ).visible )
+		.map( route => ( {
 			name: route.name as string,
 			path: route.path,
-			title: ( route.props as { title: string } ).title
-		})) || [];
+			title: ( route.props as { title: string; } ).title
+		} ) ) || [];
 
 </script>
 
@@ -22,7 +22,10 @@
 		:links="routeLinks"
 	/>
 
-	<RouterView />
+	<!-- <Suspense> -->
+		<RouterView />
+	<!-- </Suspense> -->
+
 </template>
 
 <style scoped>

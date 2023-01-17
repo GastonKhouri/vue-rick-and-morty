@@ -8,7 +8,7 @@
 	<div class="wrapper">
 		<header>
 			<NavBar 
-				title="BreakingBad" 
+				title="Rick and Morty" 
 				:links="routeLinks"
 			/>
 		</header>

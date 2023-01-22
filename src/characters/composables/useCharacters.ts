@@ -1,53 +1,66 @@
-import { onMounted, ref } from 'vue';
+import { ref, computed } from 'vue';
+import axios from 'axios';
+import { useQuery } from '@tanstack/vue-query';
+
 import { rickAndMortyApi } from '@/api/rickAndMortyApi';
 import type { Character, CharacterResponse } from '../interfaces/character';
-import axios from 'axios';
 
-const characters = ref<Character[]>( [] );
-const isLoading = ref<boolean>( true );
-const hasError = ref<boolean>( false );
-const errorMessage = ref<string>( '' );
+const characters = ref<Character[]>([]);
+const hasError = ref<boolean>(false);
+const errorMsg = ref<string | null>(null);
+
+const getCharacters = async (): Promise<Character[]> => {
+
+	if (characters.value.length > 0) {
+		return characters.value
+	}
+
+	const { data } = await rickAndMortyApi.get<CharacterResponse>("/character")
+	return data.results
+}
+
+const loadedCharacters = (data: Character[]) => {
+
+	hasError.value = false
+	errorMsg.value = null
+	characters.value = data
+
+}
+
+const loadCharactersError = (error: string) => {
+
+	hasError.value = true
+	errorMsg.value = error
+	characters.value = []
+
+}
 
 export const useCharacters = () => {
-
-	onMounted( () => {
-		loadCharacters();
-	} );
-
-	const loadCharacters = async () => {
-
-		if ( characters.value.length > 0 ) return;
-
-		isLoading.value = true;
-		hasError.value = false;
-
-		try {
-
-			const { data } = await rickAndMortyApi.get<CharacterResponse>( "/character" );
-			characters.value = data.results;
-			isLoading.value = false;
-
-		} catch ( error ) {
-
-			hasError.value = true;
-			isLoading.value = false;
-
-			if ( axios.isAxiosError( error ) ) {
-				errorMessage.value = error.response?.data.error;
-				return;
+	
+	const { isLoading } = useQuery(
+		['characters'],
+		getCharacters,
+		{
+			onSuccess: loadedCharacters,
+			onError: (error: Error) => {
+				if (axios.isAxiosError(error)) {
+					loadCharactersError(error.response?.data.error)
+				}
 			}
-
-			errorMessage.value = JSON.stringify( error );
-
 		}
-
-	};
+	);
 
 	return {
+		//* Props
 		characters,
 		isLoading,
 		hasError,
-		errorMessage,
-	};
+		errorMsg,
 
-};
+		//* Getters
+		count: computed(() => characters.value.length),
+
+		//* Methods
+	}
+
+}

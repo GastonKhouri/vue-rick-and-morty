@@ -7,8 +7,8 @@ import CharacterId from '@/characters/pages/CharacterId.vue';
 const ROUTE_NAME = 'characters';
 
 export const characterRoute: RouteRecordRaw = {
-	path: `${ROUTE_NAME}`,
-	redirect: `${ROUTE_NAME}/list`,
+	path: `/${ROUTE_NAME}`,
+	redirect: `/${ROUTE_NAME}/list`,
 	component: CharacterLayout,
 	children: [
 		{

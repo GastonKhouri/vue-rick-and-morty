@@ -1,67 +1,45 @@
 <script setup lang="ts">
 
-import axios from 'axios';
-import { useRoute } from 'vue-router';
-import { useQuery } from '@tanstack/vue-query';
+import { watchEffect } from 'vue';
+import { useRouter } from 'vue-router';
+import { useCharacter } from '../composables';
 
-import { rickAndMortyApi } from '@/api/rickAndMortyApi';
-import characterStore from '@/store/characters.store';
-import type { Character } from '../interfaces/character';
+const { character, errorMsg, hasError, isLoading } = useCharacter();
+const router = useRouter();
 
-const route = useRoute();
+//* Watch para una sola propiedad
+//* watchEffect para multiples propiedades
 
-const { id } = route.params as { id: string };
-
-// Function to get the character with axios
-const getCharacter = async (id: string) => {
-
-	if (characterStore.checkIdInStore(id)) {
-		return characterStore.ids.list[id]
+watchEffect(() => {
+	if (!isLoading.value && hasError.value) {
+		router.replace('/characters');
 	}
-
-	const { data } = await rickAndMortyApi.get(`/character/${id}`);
-	return data;
-};
-
-useQuery(
-	['character', id],
-	() => getCharacter(id),
-	{
-		onSuccess: (data: Character) => {
-			characterStore.loadedCharacter(data)
-		},
-		onError: (error: Error) => {
-			if (axios.isAxiosError(error)) {
-				characterStore.loadCharactersError(error.response?.data.error)
-			}
-		}
-	}
-)
+});
 
 </script>
 
 <template>
 
-	<h1 v-if="characterStore.ids.isLoading">Cargando...</h1>
+	<h1 v-if="isLoading">Cargando...</h1>
 
-	<div v-else-if="characterStore.ids.hasError">
+	<div v-else-if="hasError">
 		<h1>Error al cargar</h1>
-		<p>{{ characterStore.ids.errorMsg }}</p>
+		<p>{{ errorMsg }}</p>
 	</div>
 
-	<div v-else>
-		<h1>{{ characterStore.ids.list[id].name }}</h1>
+	<div v-else-if="character">
+		<h1>{{ character.name }}</h1>
 		<div class="character-container">
 			<img 
-				:src="characterStore.ids.list[id].image" 
-				:alt="characterStore.ids.list[id].name" 
+				:src="character.image" 
+				:alt="character.name" 
 			/>
 			<ul>
-				<li>Genero: {{ characterStore.ids.list[id].gender }}</li>
-				<li>Localización: {{ characterStore.ids.list[id].location.name }}</li>
-				<li>Origen: {{ characterStore.ids.list[id].origin.name }}</li>
-				<li>Especies: {{ characterStore.ids.list[id].species }}</li>
-				<li>Estado: {{ characterStore.ids.list[id].status }}</li>
+				<li>Genero: {{ character.gender }}</li>
+				<li>Localización: {{ character.location.name }}</li>
+				<li>Origen: {{ character.origin.name }}</li>
+				<li>Especies: {{ character.species }}</li>
+				<li>Estado: {{ character.status }}</li>
 			</ul>
 		</div>
 	</div>
